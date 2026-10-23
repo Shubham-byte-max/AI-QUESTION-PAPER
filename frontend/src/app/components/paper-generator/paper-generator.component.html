@@ -1,0 +1,784 @@
+<div class="paper-gen-page">
+  <header class="page-header">
+    <div class="header-left">
+      <div class="header-logo">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+          <path d="M8 7h6" />
+          <path d="M8 11h8" />
+        </svg>
+      </div>
+      <span class="header-title">Question Paper Generator</span>
+    </div>
+    <div class="header-right">
+      <a class="nav-link" routerLink="/dashboard">Dashboard</a>
+      <a class="nav-link" routerLink="/subjects">Subjects</a>
+      <a class="nav-link" routerLink="/syllabus">Syllabus</a>
+      <a class="nav-link" routerLink="/questions">Questions</a>
+      <a class="nav-link" routerLink="/generate">AI Generate</a>
+      <a class="nav-link" routerLink="/patterns">Patterns</a>
+      <a class="nav-link active" routerLink="/papers">Papers</a>
+      <a class="nav-link" routerLink="/papers/history">History</a>
+      <a class="nav-link" routerLink="/profile">Profile</a>
+      <a class="nav-link" routerLink="/settings">Settings</a>
+      <span class="user-name">{{ authService.user()?.name }}</span>
+      <button class="logout-btn" (click)="logout()">Sign Out</button>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="page-top">
+      <div class="page-title-section">
+        <h1>Generate Question Paper</h1>
+        <p>Configure your paper settings, generate questions, preview, and save.</p>
+      </div>
+    </div>
+
+    @if (successMessage()) {
+      <div class="success-banner">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+        <span>{{ successMessage() }}</span>
+      </div>
+    }
+
+    <!-- Step Indicator -->
+    <div class="step-indicator">
+      <div
+        class="step"
+        [class.active]="currentStep() === 1"
+        [class.completed]="currentStep() > 1"
+        (click)="goToStep(1)"
+      >
+        <div class="step-number">{{ currentStep() > 1 ? '&#10003;' : '1' }}</div>
+        <span class="step-label">Basic Config</span>
+      </div>
+      <div class="step-connector" [class.active]="currentStep() > 1"></div>
+      <div
+        class="step"
+        [class.active]="currentStep() === 2"
+        [class.completed]="currentStep() > 2"
+        (click)="goToStep(2)"
+      >
+        <div class="step-number">{{ currentStep() > 2 ? '&#10003;' : '2' }}</div>
+        <span class="step-label">Question Setup</span>
+      </div>
+      <div class="step-connector" [class.active]="currentStep() > 2"></div>
+      <div class="step" [class.active]="currentStep() === 3">
+        <div class="step-number">3</div>
+        <span class="step-label">Preview & Save</span>
+      </div>
+    </div>
+
+    @if (formError()) {
+      <div class="error-banner">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        <span>{{ formError() }}</span>
+        <button class="banner-dismiss" (click)="formError.set('')">&times;</button>
+      </div>
+    }
+
+    <!-- Step 1: Basic Configuration -->
+    @if (currentStep() === 1) {
+      <div class="step-content">
+        <div class="config-card">
+          <h3 class="config-title">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="3" />
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+              />
+            </svg>
+            Basic Configuration
+          </h3>
+
+          <div class="form-group">
+            <label>Paper Title *</label>
+            <input
+              type="text"
+              placeholder="e.g. Mid-term Examination 2026"
+              [value]="formTitle()"
+              (input)="formTitle.set($any($event.target).value)"
+            />
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label>Subject *</label>
+              <select
+                [value]="formSubjectId()"
+                (change)="onSubjectChange($any($event.target).value)"
+              >
+                <option value="">Select Subject</option>
+                @for (sub of subjects(); track sub.id) {
+                  <option [value]="sub.id">{{ sub.name }} ({{ sub.code }})</option>
+                }
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Syllabus</label>
+              <select
+                [value]="formSyllabusId()"
+                (change)="onSyllabusChange($any($event.target).value)"
+                [disabled]="loadingSyllabi() || !formSubjectId()"
+              >
+                <option value="">No specific syllabus</option>
+                @for (s of syllabi(); track s.id) {
+                  <option [value]="s.id">{{ s.title }}</option>
+                }
+              </select>
+              @if (loadingSyllabi()) {
+                <span class="field-hint">Loading syllabi...</span>
+              }
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Exam Pattern</label>
+            <select
+              [value]="formExamPatternId()"
+              (change)="onPatternChange($any($event.target).value)"
+            >
+              <option value="">No specific pattern (manual config)</option>
+              @for (p of patterns(); track p.id) {
+                <option [value]="p.id">
+                  {{ p.patternName }} ({{ p.totalMarks }} marks, {{ p.duration }} min)
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label>Total Marks *</label>
+              <input
+                type="number"
+                min="1"
+                [value]="formTotalMarks()"
+                (input)="formTotalMarks.set(+$any($event.target).value)"
+              />
+            </div>
+            <div class="form-group">
+              <label>Duration (minutes) *</label>
+              <input
+                type="number"
+                min="1"
+                [value]="formDuration()"
+                (input)="formDuration.set(+$any($event.target).value)"
+              />
+            </div>
+          </div>
+
+          <div class="step-actions">
+            <div></div>
+            <button class="next-btn" (click)="nextStep()">
+              Next Step
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Step 2: Question Setup -->
+    @if (currentStep() === 2) {
+      <div class="step-content">
+        <div class="config-card">
+          <h3 class="config-title">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+            Question Setup
+          </h3>
+
+          <div class="form-group">
+            <label>Question Types * (select one or more)</label>
+            <div class="type-selector">
+              @for (type of questionTypes; track type) {
+                <button
+                  class="type-chip"
+                  [class.selected]="formQuestionTypes().includes(type)"
+                  (click)="toggleQuestionType(type)"
+                  type="button"
+                >
+                  {{ type }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label>Number of Questions *</label>
+              <input
+                type="number"
+                min="1"
+                max="100"
+                [value]="formNumberOfQuestions()"
+                (input)="formNumberOfQuestions.set(+$any($event.target).value)"
+              />
+            </div>
+            <div class="form-group">
+              <label>Number of Sets (1-5)</label>
+              <input
+                type="number"
+                min="1"
+                max="5"
+                [value]="formSetCount()"
+                (input)="formSetCount.set(+$any($event.target).value)"
+              />
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label>Marks per Question (avg)</label>
+              <div class="readonly-field">
+                {{
+                  formTotalMarks() > 0 && formNumberOfQuestions() > 0
+                    ? (formTotalMarks() / formNumberOfQuestions() | number: '1.1-1')
+                    : '-'
+                }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label>&nbsp;</label>
+              <span class="field-hint"
+                >Same config, each set gets unique questions (Set A, B, C...).</span
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Additional Instructions</label>
+            <textarea
+              rows="3"
+              placeholder="e.g. Focus on practical applications, use real-world scenarios..."
+              [value]="formInstructions()"
+              (input)="formInstructions.set($any($event.target).value)"
+            ></textarea>
+          </div>
+
+          <div class="step-actions">
+            <button class="prev-btn" (click)="prevStep()">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+              Previous
+            </button>
+            <button class="generate-btn" (click)="generatePaper()" [disabled]="generating()">
+              @if (generating()) {
+                <span class="btn-spinner"></span>
+                <span>Generating Paper...</span>
+              } @else {
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                </svg>
+                <span>Generate Paper</span>
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Step 3: Preview & Save -->
+    @if (currentStep() === 3) {
+      @if (generating()) {
+        <div class="generating-state">
+          <div class="spinner large"></div>
+          <h3>Generating Paper...</h3>
+          <p>AI is creating your questions based on the configuration. This may take a moment.</p>
+        </div>
+      } @else if (generatedPaper()) {
+        <div class="preview-section">
+          <!-- Paper Header -->
+          <div class="paper-preview-card">
+            <div class="paper-header-preview">
+              <h2>{{ generatedPaper()!.title }}</h2>
+              <div class="paper-meta">
+                <span
+                  >{{ generatedPaper()!.subjectName }} ({{ generatedPaper()!.subjectCode }})</span
+                >
+                <span>Total Marks: {{ generatedPaper()!.totalMarks }}</span>
+                <span>Duration: {{ generatedPaper()!.duration }} minutes</span>
+                <span>Questions: {{ generatedPaper()!.questions.length }}</span>
+              </div>
+            </div>
+
+            <!-- Marks Summary -->
+            <div class="marks-summary">
+              <div class="marks-item">
+                <span class="marks-label">Configured Marks</span>
+                <span class="marks-value">{{ generatedPaper()!.totalMarks }}</span>
+              </div>
+              <div
+                class="marks-item"
+                [class.mismatch]="
+                  generatedPaper()!.actualTotalMarks !== generatedPaper()!.totalMarks
+                "
+              >
+                <span class="marks-label">Actual Marks</span>
+                <span class="marks-value">{{ generatedPaper()!.actualTotalMarks }}</span>
+              </div>
+              @if (
+                generatedPaper()!.sectionDetails && generatedPaper()!.sectionDetails.length > 0
+              ) {
+                <div class="section-breakdown">
+                  <span class="marks-label">Section Breakdown:</span>
+                  @for (sec of generatedPaper()!.sectionDetails; track sec.name) {
+                    <span class="section-tag"
+                      >{{ sec.name }}: {{ sec.questionCount }} {{ sec.questionType }} ({{
+                        sec.requiredMarks
+                      }}
+                      marks)</span
+                    >
+                  }
+                </div>
+              }
+            </div>
+
+            @if (generationWarnings().length > 0) {
+              <div class="warnings-banner">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"
+                  />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+                <span
+                  >{{ generationWarnings().length }} warning(s):
+                  {{ generationWarnings().join('; ') }}</span
+                >
+              </div>
+            }
+          </div>
+
+          <!-- Questions List -->
+          <div class="preview-questions">
+            <div class="preview-header">
+              <h3>Questions ({{ generatedPaper()!.questions.length }})</h3>
+            </div>
+
+            @for (q of generatedPaper()!.questions; track $index; let i = $index) {
+              <div class="question-card" [class.editing]="editingQuestionIndex() === i">
+                <div class="card-header">
+                  <span class="question-number">{{ i + 1 }}.</span>
+                  <div class="card-badges">
+                    <span class="type-badge" [attr.data-type]="q.type">{{ q.type }}</span>
+                    <span class="difficulty-badge" [attr.data-difficulty]="q.difficulty">{{
+                      q.difficulty
+                    }}</span>
+                    <span class="marks-badge"
+                      >{{ q.marks }} {{ q.marks === 1 ? 'mark' : 'marks' }}</span
+                    >
+                    @if (q.section) {
+                      <span class="section-badge">{{ q.section }}</span>
+                    }
+                    @if (q.source) {
+                      <span class="source-badge">{{ q.source }}</span>
+                    }
+                  </div>
+                  <div class="card-actions">
+                    @if (editingQuestionIndex() !== i) {
+                      <button
+                        class="card-btn"
+                        (click)="moveQuestion(i, -1)"
+                        [disabled]="i === 0"
+                        title="Move up"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <polyline points="18 15 12 9 6 15" />
+                        </svg>
+                      </button>
+                      <button
+                        class="card-btn"
+                        (click)="moveQuestion(i, 1)"
+                        [disabled]="i === generatedPaper()!.questions.length - 1"
+                        title="Move down"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                      </button>
+                      <button class="card-btn edit" (click)="startEditQuestion(i)" title="Edit">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                          <path d="m15 5 4 4" />
+                        </svg>
+                      </button>
+                    }
+                    <button class="card-btn delete" (click)="deleteQuestion(i)" title="Remove">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                @if (editingQuestionIndex() === i) {
+                  <div class="edit-form">
+                    <div class="form-group">
+                      <label>Question Text</label>
+                      <textarea
+                        rows="3"
+                        [value]="editText()"
+                        (input)="editText.set($any($event.target).value)"
+                      ></textarea>
+                    </div>
+                    @if (q.type === 'MCQ') {
+                      <div class="form-group">
+                        <label>Options</label>
+                        @for (opt of editOptions(); track $index; let oi = $index) {
+                          <div class="edit-option-row">
+                            <span class="option-label">{{
+                              ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'][oi]
+                            }}</span>
+                            <input
+                              type="text"
+                              [value]="opt"
+                              (input)="updateEditOption(oi, $any($event.target).value)"
+                            />
+                            @if (editOptions().length > 2) {
+                              <button
+                                class="option-remove"
+                                (click)="removeEditOption(oi)"
+                                type="button"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="12"
+                                  height="12"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  stroke-width="2"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                >
+                                  <line x1="18" y1="6" x2="6" y2="18" />
+                                  <line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
+                              </button>
+                            }
+                          </div>
+                        }
+                        @if (editOptions().length < 8) {
+                          <button class="add-option-btn" (click)="addEditOption()" type="button">
+                            + Add Option
+                          </button>
+                        }
+                      </div>
+                    }
+                    <div class="form-row-3">
+                      <div class="form-group">
+                        <label>Answer</label>
+                        <input
+                          type="text"
+                          [value]="editAnswer()"
+                          (input)="editAnswer.set($any($event.target).value)"
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label>Topic</label>
+                        <input
+                          type="text"
+                          [value]="editTopic()"
+                          (input)="editTopic.set($any($event.target).value)"
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label>Marks</label>
+                        <input
+                          type="number"
+                          min="1"
+                          [value]="editMarks()"
+                          (input)="editMarks.set(+$any($event.target).value)"
+                        />
+                      </div>
+                    </div>
+                    <div class="edit-actions">
+                      <button class="cancel-btn" (click)="cancelEditQuestion()">Cancel</button>
+                      <button class="save-btn" (click)="saveEditQuestion()">Save Changes</button>
+                    </div>
+                  </div>
+                } @else {
+                  <div class="card-body">
+                    <p class="question-text">{{ q.text }}</p>
+                    @if (q.type === 'MCQ' && q.options.length > 0) {
+                      <div class="options-grid">
+                        @for (opt of q.options; track $index; let oi = $index) {
+                          <div class="option-item">
+                            <span class="option-letter">{{
+                              ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'][oi]
+                            }}</span>
+                            <span class="option-text">{{ opt }}</span>
+                          </div>
+                        }
+                      </div>
+                    }
+                    @if (q.answer) {
+                      <div class="answer-section"><strong>Answer:</strong> {{ q.answer }}</div>
+                    }
+                    @if (q.topic) {
+                      <div class="topic-section">
+                        <span class="topic-label">Topic:</span> {{ q.topic }}
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Save Actions -->
+          <div class="save-actions">
+            <button class="prev-btn" (click)="currentStep.set(2)">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+              Back to Edit
+            </button>
+            <div class="save-right">
+              <button class="regen-btn" (click)="generatePaper()" [disabled]="generating()">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                  <path d="M3 3v5h5" />
+                  <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                  <path d="M16 16h5v5" />
+                </svg>
+                Regenerate
+              </button>
+              @if (savedPaperId()) {
+                <button class="saved-indicator" disabled>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <polyline points="22 4 12 14.01 9 11.01" />
+                  </svg>
+                  Saved
+                </button>
+                <button class="new-paper-btn" (click)="resetForm()">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  New Paper
+                </button>
+              } @else {
+                <button
+                  class="save-btn-lg"
+                  (click)="savePaper()"
+                  [disabled]="saving() || generatedPaper()!.questions.length === 0"
+                >
+                  @if (saving()) {
+                    <span class="btn-spinner"></span>
+                    Saving...
+                  } @else {
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                      <polyline points="17 21 17 13 7 13 7 21" />
+                      <polyline points="7 3 7 8 15 8" />
+                    </svg>
+                    Save Paper
+                  }
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    }
+  </main>
+</div>

@@ -1,0 +1,438 @@
+<div class="settings-page">
+  <header class="page-header">
+    <div class="header-left">
+      <div class="header-logo">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+          <path d="M8 7h6" />
+          <path d="M8 11h8" />
+        </svg>
+      </div>
+      <span class="header-title">Question Paper Generator</span>
+    </div>
+    <div class="header-right">
+      <a class="nav-link" routerLink="/dashboard">Dashboard</a>
+      <a class="nav-link" routerLink="/subjects">Subjects</a>
+      <a class="nav-link" routerLink="/syllabus">Syllabus</a>
+      <a class="nav-link" routerLink="/questions">Questions</a>
+      <a class="nav-link" routerLink="/generate">AI Generate</a>
+      <a class="nav-link" routerLink="/patterns">Patterns</a>
+      <a class="nav-link" routerLink="/papers">Papers</a>
+      <a class="nav-link" routerLink="/papers/history">History</a>
+      <span class="user-name">{{ authService.user()?.name }}</span>
+      <button class="logout-btn" (click)="logout()">Sign Out</button>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="page-top">
+      <div class="page-title-section">
+        <h1>Settings</h1>
+        <p>Manage your account settings and preferences.</p>
+      </div>
+      <button class="profile-link-btn" (click)="navigateToProfile()">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+        <span>Profile</span>
+      </button>
+    </div>
+
+    <div class="settings-grid">
+      <div class="settings-section">
+        <div class="section-header">
+          <h3>Change Password</h3>
+          <p>Update your password to keep your account secure.</p>
+        </div>
+
+        @if (passwordSuccess()) {
+          <div class="success-banner">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+            <span>{{ passwordSuccess() }}</span>
+          </div>
+        }
+
+        @if (passwordError()) {
+          <div class="error-banner">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="15" y1="9" x2="9" y2="15" />
+              <line x1="9" y1="9" x2="15" y2="15" />
+            </svg>
+            <span>{{ passwordError() }}</span>
+          </div>
+        }
+
+        <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" novalidate>
+          <div class="form-group">
+            <label for="currentPassword">Current Password</label>
+            <div
+              class="input-wrapper"
+              [class.input-error]="f['currentPassword'].touched && f['currentPassword'].invalid"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              <input
+                id="currentPassword"
+                [type]="showCurrentPassword() ? 'text' : 'password'"
+                formControlName="currentPassword"
+                placeholder="Enter current password"
+                autocomplete="current-password"
+              />
+              <button
+                type="button"
+                class="toggle-password"
+                (click)="toggleCurrentPassword()"
+                [attr.aria-label]="showCurrentPassword() ? 'Hide password' : 'Show password'"
+              >
+                @if (showCurrentPassword()) {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                    <path
+                      d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"
+                    />
+                    <path
+                      d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"
+                    />
+                    <line x1="2" x2="22" y1="2" y2="22" />
+                  </svg>
+                } @else {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                }
+              </button>
+            </div>
+            @if (f['currentPassword'].touched && f['currentPassword'].errors) {
+              <div class="field-error">
+                <span>Current password is required</span>
+              </div>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="newPassword">New Password</label>
+            <div
+              class="input-wrapper"
+              [class.input-error]="f['newPassword'].touched && f['newPassword'].invalid"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              <input
+                id="newPassword"
+                [type]="showNewPassword() ? 'text' : 'password'"
+                formControlName="newPassword"
+                placeholder="Enter new password"
+                autocomplete="new-password"
+              />
+              <button
+                type="button"
+                class="toggle-password"
+                (click)="toggleNewPassword()"
+                [attr.aria-label]="showNewPassword() ? 'Hide password' : 'Show password'"
+              >
+                @if (showNewPassword()) {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                    <path
+                      d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"
+                    />
+                    <path
+                      d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"
+                    />
+                    <line x1="2" x2="22" y1="2" y2="22" />
+                  </svg>
+                } @else {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                }
+              </button>
+            </div>
+            @if (f['newPassword'].touched && f['newPassword'].errors) {
+              <div class="field-error">
+                @if (f['newPassword'].errors['required']) {
+                  <span>New password is required</span>
+                } @else if (f['newPassword'].errors['minlength']) {
+                  <span>Password must be at least 6 characters</span>
+                }
+              </div>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="confirmPassword">Confirm New Password</label>
+            <div
+              class="input-wrapper"
+              [class.input-error]="
+                (f['confirmPassword'].touched && f['confirmPassword'].invalid) ||
+                (f['confirmPassword'].touched && passwordForm.errors?.['passwordMismatch'])
+              "
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              <input
+                id="confirmPassword"
+                [type]="showConfirmPassword() ? 'text' : 'password'"
+                formControlName="confirmPassword"
+                placeholder="Confirm new password"
+                autocomplete="new-password"
+              />
+              <button
+                type="button"
+                class="toggle-password"
+                (click)="toggleConfirmPassword()"
+                [attr.aria-label]="showConfirmPassword() ? 'Hide password' : 'Show password'"
+              >
+                @if (showConfirmPassword()) {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                    <path
+                      d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"
+                    />
+                    <path
+                      d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"
+                    />
+                    <line x1="2" x2="22" y1="2" y2="22" />
+                  </svg>
+                } @else {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                }
+              </button>
+            </div>
+            @if (f['confirmPassword'].touched && f['confirmPassword'].errors) {
+              <div class="field-error">
+                <span>Confirm password is required</span>
+              </div>
+            } @else if (f['confirmPassword'].touched && passwordForm.errors?.['passwordMismatch']) {
+              <div class="field-error">
+                <span>Passwords do not match</span>
+              </div>
+            }
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="save-btn" [disabled]="isSubmittingPassword()">
+              @if (isSubmittingPassword()) {
+                <span class="spinner-small"></span>
+                <span>Changing...</span>
+              } @else {
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                <span>Change Password</span>
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="settings-section">
+        <div class="section-header">
+          <h3>Account</h3>
+          <p>Manage your account session.</p>
+        </div>
+
+        <div class="account-section">
+          <div class="account-item">
+            <div class="account-info">
+              <span class="account-label">Signed in as</span>
+              <span class="account-value">{{ authService.user()?.email }}</span>
+            </div>
+          </div>
+
+          <div class="account-item danger">
+            <div class="account-info">
+              <span class="account-label">Sign Out</span>
+              <span class="account-description">Sign out of your account on this device.</span>
+            </div>
+            <button class="logout-action-btn" (click)="toggleLogoutConfirm()">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" x2="9" y1="12" y2="12" />
+              </svg>
+              <span>Sign Out</span>
+            </button>
+          </div>
+
+          @if (showLogoutConfirm()) {
+            <div class="confirm-banner">
+              <p>Are you sure you want to sign out?</p>
+              <div class="confirm-actions">
+                <button class="cancel-confirm-btn" (click)="toggleLogoutConfirm()">Cancel</button>
+                <button class="confirm-logout-btn" (click)="logout()">Yes, Sign Out</button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

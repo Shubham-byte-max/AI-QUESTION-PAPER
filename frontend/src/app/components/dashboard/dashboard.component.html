@@ -1,0 +1,370 @@
+<div class="dashboard">
+  <header class="dashboard-header">
+    <div class="header-left">
+      <div class="header-logo">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+          <path d="M8 7h6" />
+          <path d="M8 11h8" />
+        </svg>
+      </div>
+      <span class="header-title">Question Paper Generator</span>
+    </div>
+    <div class="header-right">
+      <a class="nav-link" routerLink="/dashboard">Dashboard</a>
+      <a class="nav-link" routerLink="/subjects">Subjects</a>
+      <a class="nav-link" routerLink="/syllabus">Syllabus</a>
+      <a class="nav-link" routerLink="/questions">Questions</a>
+      <a class="nav-link" routerLink="/generate">AI Generate</a>
+      <a class="nav-link" routerLink="/patterns">Patterns</a>
+      <a class="nav-link" routerLink="/papers">Papers</a>
+      <a class="nav-link" routerLink="/papers/history">History</a>
+      <a class="nav-link" routerLink="/profile">Profile</a>
+      <a class="nav-link" routerLink="/settings">Settings</a>
+      <span class="user-name">{{ authService.user()?.name }}</span>
+      <button class="logout-btn" (click)="logout()">Sign Out</button>
+    </div>
+  </header>
+
+  <main class="dashboard-content">
+    <div class="welcome-section">
+      <div class="welcome-text">
+        <h1>Welcome, {{ authService.user()?.name || 'User' }}</h1>
+        <p>Manage and generate question papers with AI assistance.</p>
+      </div>
+      <button class="generate-btn" (click)="navigateToGenerate()">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M12 5v14" />
+          <path d="M5 12h14" />
+        </svg>
+        <span>Quick Generate Paper</span>
+      </button>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading dashboard data...</p>
+      </div>
+    } @else if (error()) {
+      <div class="error-state">
+        <div class="error-icon">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="40"
+            height="40"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+        </div>
+        <p class="error-text">{{ error() }}</p>
+        <button class="retry-btn" (click)="loadDashboard()">Try Again</button>
+      </div>
+    } @else if (data()) {
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon blue">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ data()!.stats.totalSubjects }}</span>
+            <span class="stat-label">Total Subjects</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ data()!.stats.totalSyllabus }}</span>
+            <span class="stat-label">Total Syllabus</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon purple">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+              <path d="M12 17h.01" />
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ data()!.stats.totalQuestions }}</span>
+            <span class="stat-label">Total Questions</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+              <rect width="8" height="7" x="4" y="2" rx="1" />
+              <path d="m22 8-4 4 4 4" />
+              <path d="M16 12h8" />
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ data()!.stats.totalPapers }}</span>
+            <span class="stat-label">Generated Papers</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-grid">
+        <div class="section-card">
+          <div class="section-header">
+            <h2>Recent Papers</h2>
+          </div>
+          @if (data()!.recentPapers.length === 0) {
+            <div class="empty-state">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+              <p>No papers generated yet</p>
+              <span>Create your first question paper to see it here.</span>
+            </div>
+          } @else {
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Subject</th>
+                    <th>Marks</th>
+                    <th>Duration</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (paper of data()!.recentPapers; track paper.id) {
+                    <tr>
+                      <td class="cell-title">{{ paper.title }}</td>
+                      <td>{{ paper.subject }}</td>
+                      <td>{{ paper.totalMarks }}</td>
+                      <td>{{ paper.duration }} min</td>
+                      <td>{{ formatDate(paper.createdAt) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+
+        <div class="section-card">
+          <div class="section-header">
+            <h2>Recent Questions</h2>
+          </div>
+          @if (data()!.recentQuestions.length === 0) {
+            <div class="empty-state">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                <path d="M12 17h.01" />
+              </svg>
+              <p>No questions added yet</p>
+              <span>Start adding questions to your bank.</span>
+            </div>
+          } @else {
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Type</th>
+                    <th>Difficulty</th>
+                    <th>Marks</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (q of data()!.recentQuestions; track q.id) {
+                    <tr>
+                      <td class="cell-title">{{ truncateText(q.text, 50) }}</td>
+                      <td>{{ q.type }}</td>
+                      <td>
+                        <span class="badge" [attr.data-difficulty]="q.difficulty">{{
+                          q.difficulty
+                        }}</span>
+                      </td>
+                      <td>{{ q.marks }}</td>
+                      <td>{{ formatDate(q.createdAt) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="content-grid">
+        <div class="section-card">
+          <div class="section-header">
+            <h2>Question Difficulty</h2>
+          </div>
+          <div class="summary-list">
+            <div class="summary-item">
+              <div class="summary-label">
+                <span class="difficulty-dot easy"></span>
+                <span>Easy</span>
+              </div>
+              <div class="summary-bar-wrapper">
+                <div
+                  class="summary-bar easy"
+                  [style.width.%]="getDifficultyPercent(data()!.difficultySummary.Easy)"
+                ></div>
+              </div>
+              <span class="summary-count">{{ data()!.difficultySummary.Easy }}</span>
+            </div>
+            <div class="summary-item">
+              <div class="summary-label">
+                <span class="difficulty-dot medium"></span>
+                <span>Medium</span>
+              </div>
+              <div class="summary-bar-wrapper">
+                <div
+                  class="summary-bar medium"
+                  [style.width.%]="getDifficultyPercent(data()!.difficultySummary.Medium)"
+                ></div>
+              </div>
+              <span class="summary-count">{{ data()!.difficultySummary.Medium }}</span>
+            </div>
+            <div class="summary-item">
+              <div class="summary-label">
+                <span class="difficulty-dot hard"></span>
+                <span>Hard</span>
+              </div>
+              <div class="summary-bar-wrapper">
+                <div
+                  class="summary-bar hard"
+                  [style.width.%]="getDifficultyPercent(data()!.difficultySummary.Hard)"
+                ></div>
+              </div>
+              <span class="summary-count">{{ data()!.difficultySummary.Hard }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-header">
+            <h2>Question Types</h2>
+          </div>
+          @if (getTypeEntries().length === 0) {
+            <div class="empty-state compact">
+              <p>No question types to display</p>
+            </div>
+          } @else {
+            <div class="summary-list">
+              @for (entry of getTypeEntries(); track entry.type) {
+                <div class="summary-item">
+                  <div class="summary-label">
+                    <span class="type-dot"></span>
+                    <span>{{ entry.type }}</span>
+                  </div>
+                  <div class="summary-bar-wrapper">
+                    <div class="summary-bar type" [style.width.%]="entry.percent"></div>
+                  </div>
+                  <span class="summary-count">{{ entry.count }}</span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </main>
+</div>

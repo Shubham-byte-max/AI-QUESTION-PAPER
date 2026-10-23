@@ -1,0 +1,710 @@
+<div class="generator-page">
+  <header class="page-header">
+    <div class="header-left">
+      <div class="header-logo">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+          <path d="M8 7h6" />
+          <path d="M8 11h8" />
+        </svg>
+      </div>
+      <span class="header-title">Question Paper Generator</span>
+    </div>
+    <div class="header-right">
+      <a class="nav-link" routerLink="/dashboard">Dashboard</a>
+      <a class="nav-link" routerLink="/subjects">Subjects</a>
+      <a class="nav-link" routerLink="/syllabus">Syllabus</a>
+      <a class="nav-link" routerLink="/questions">Questions</a>
+      <a class="nav-link active" routerLink="/generate">AI Generate</a>
+      <a class="nav-link" routerLink="/patterns">Patterns</a>
+      <a class="nav-link" routerLink="/papers">Papers</a>
+      <a class="nav-link" routerLink="/papers/history">History</a>
+      <a class="nav-link" routerLink="/profile">Profile</a>
+      <a class="nav-link" routerLink="/settings">Settings</a>
+      <span class="user-name">{{ authService.user()?.name }}</span>
+      <button class="logout-btn" (click)="logout()">Sign Out</button>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="page-top">
+      <div class="page-title-section">
+        <h1>AI Question Generator</h1>
+        <p>Configure your settings and let AI generate questions for you.</p>
+      </div>
+    </div>
+
+    <div class="generator-layout">
+      <div class="config-panel">
+        <div class="config-card">
+          <h3 class="config-title">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="3" />
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+              />
+            </svg>
+            Configuration
+          </h3>
+
+          <div class="form-group">
+            <label>Subject *</label>
+            <select
+              [value]="formSubjectId()"
+              (change)="onSubjectChange($any($event.target).value)"
+              [disabled]="generating()"
+            >
+              <option value="">Select Subject</option>
+              @for (sub of subjects(); track sub.id) {
+                <option [value]="sub.id">{{ sub.name }} ({{ sub.code }})</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Syllabus</label>
+            <select
+              [value]="formSyllabusId()"
+              (change)="formSyllabusId.set($any($event.target).value)"
+              [disabled]="generating() || loadingSyllabi()"
+            >
+              <option value="">No specific syllabus</option>
+              @for (s of syllabi(); track s.id) {
+                <option [value]="s.id">{{ s.title }}</option>
+              }
+            </select>
+            @if (loadingSyllabi()) {
+              <span class="field-hint">Loading syllabi...</span>
+            }
+          </div>
+
+          @if (syllabusTopics.length > 0) {
+            <div class="form-group">
+              <label>Unit/Topic</label>
+              <select
+                [value]="formTopic()"
+                (change)="formTopic.set($any($event.target).value)"
+                [disabled]="generating()"
+              >
+                <option value="">All topics</option>
+                @for (t of syllabusTopics; track t.name) {
+                  <option [value]="t.name">
+                    {{ t.name }}{{ t.weightage ? ' (' + t.weightage + '%)' : '' }}
+                  </option>
+                }
+              </select>
+            </div>
+          } @else {
+            <div class="form-group">
+              <label>Unit/Topic</label>
+              <input
+                type="text"
+                placeholder="e.g. Unit 1 - Data Structures"
+                [value]="formTopic()"
+                (input)="formTopic.set($any($event.target).value)"
+                [disabled]="generating()"
+              />
+            </div>
+          }
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label>Number of Questions *</label>
+              <input
+                type="number"
+                min="1"
+                max="50"
+                [value]="formCount()"
+                (input)="formCount.set(+$any($event.target).value)"
+                [disabled]="generating()"
+              />
+            </div>
+            <div class="form-group">
+              <label>Marks per Question *</label>
+              <input
+                type="number"
+                min="1"
+                max="100"
+                [value]="formMarks()"
+                (input)="formMarks.set(+$any($event.target).value)"
+                [disabled]="generating()"
+              />
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label>Question Type *</label>
+              <select
+                [value]="formType()"
+                (change)="formType.set($any($event.target).value)"
+                [disabled]="generating()"
+              >
+                @for (t of questionTypes; track t) {
+                  <option [value]="t">{{ t }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Difficulty *</label>
+              <select
+                [ngModel]="formDifficulty()"
+                (ngModelChange)="formDifficulty.set($event)"
+                [disabled]="generating()"
+              >
+                @for (d of difficulties; track d) {
+                  <option [value]="d">{{ d }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Number of Paper Sets</label>
+            <input
+              type="number"
+              min="1"
+              max="5"
+              [value]="formSetCount()"
+              (input)="formSetCount.set(+$any($event.target).value)"
+              [disabled]="generating()"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Additional Instructions</label>
+            <textarea
+              rows="3"
+              placeholder="e.g. Focus on practical applications, use real-world scenarios..."
+              [value]="formInstructions()"
+              (input)="formInstructions.set($any($event.target).value)"
+              [disabled]="generating()"
+            ></textarea>
+          </div>
+
+          <button
+            class="generate-btn"
+            (click)="generate()"
+            [disabled]="generating() || !formSubjectId()"
+          >
+            @if (generating()) {
+              <span class="btn-spinner"></span>
+              <span>Generating...</span>
+            } @else {
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+              </svg>
+              <span>Generate Questions</span>
+            }
+          </button>
+        </div>
+      </div>
+
+      <div class="results-panel">
+        @if (generating()) {
+          <div class="generating-state">
+            <div class="spinner large"></div>
+            <h3>Generating Questions...</h3>
+            <p>AI is creating your questions based on the configuration. This may take a moment.</p>
+          </div>
+        } @else if (error()) {
+          <div class="error-state">
+            <div class="error-icon">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="40"
+                height="40"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+            </div>
+            <p class="error-text">{{ error() }}</p>
+            <button class="retry-btn" (click)="error.set('')">Dismiss</button>
+          </div>
+        } @else if (generatedQuestions().length === 0 && generatedSets().length === 0) {
+          <div class="empty-state">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
+            <p>No questions generated yet</p>
+            <span>Configure the settings on the left and click Generate.</span>
+          </div>
+        } @else {
+          @if (successMessage()) {
+            <div class="success-banner">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+              </svg>
+              <span>{{ successMessage() }}</span>
+            </div>
+          }
+
+          @if (generationWarnings().length > 0) {
+            <div class="warnings-banner">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"
+                />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+              <span>{{ generationWarnings().length }} validation warning(s) were corrected.</span>
+            </div>
+          }
+
+          @if (generatedSets().length > 0) {
+            <div class="results-header">
+              <div class="results-info">
+                <h3>Generated Paper Sets ({{ generatedSets().length }})</h3>
+                <span class="selected-info">{{ selectedSetsCount() }} sets selected</span>
+                <span class="selected-info"
+                  >{{ selectedSetQuestionsCount() }} questions selected</span
+                >
+              </div>
+              <div class="results-actions">
+                <button class="action-btn-sm secondary" (click)="toggleSetSelectAll()">
+                  {{
+                    selectedSetQuestionsCount() === totalSetQuestionsCount() &&
+                    totalSetQuestionsCount() > 0
+                      ? 'Deselect All'
+                      : 'Select All'
+                  }}
+                </button>
+                <button class="action-btn-sm secondary" (click)="regenerate()">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                    <path d="M3 3v5h5" />
+                    <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                    <path d="M16 16h5v5" />
+                  </svg>
+                  Regenerate
+                </button>
+                <button
+                  class="action-btn-sm primary"
+                  (click)="saveSelectedSets()"
+                  [disabled]="savingSets() || selectedSetQuestionsCount() === 0"
+                >
+                  @if (savingSets()) {
+                    <span class="btn-spinner-sm"></span>
+                    Saving...
+                  } @else {
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                      <polyline points="17 21 17 13 7 13 7 21" />
+                      <polyline points="7 3 7 8 15 8" />
+                    </svg>
+                    Save Selected Sets
+                  }
+                </button>
+              </div>
+            </div>
+
+            <div class="questions-list">
+              @for (s of generatedSets(); track $index; let si = $index) {
+                <div class="question-card" [class.selected]="s.selected">
+                  <div class="card-header">
+                    <label class="checkbox-wrapper">
+                      <input
+                        type="checkbox"
+                        [checked]="s.selected"
+                        [indeterminate]="isSetPartial(s)"
+                        (change)="toggleSetSelect(si)"
+                      />
+                      <span class="checkbox-custom"></span>
+                    </label>
+                    <div class="card-badges">
+                      <span class="marks-badge">Set {{ s.setLabel }}</span>
+                      <span class="marks-badge"
+                        >{{ s.questions.length }}
+                        {{ s.questions.length === 1 ? 'question' : 'questions' }}</span
+                      >
+                      <span class="marks-badge"
+                        >{{ setSelectedQuestionCount(s) }} / {{ s.questions.length }} selected</span
+                      >
+                      <span class="marks-badge"
+                        >{{ s.totalMarks }} {{ s.totalMarks === 1 ? 'mark' : 'marks' }}</span
+                      >
+                    </div>
+                    <div class="card-actions">
+                      <button class="action-btn-sm secondary" (click)="toggleSetPreview(si)">
+                        {{ s.previewOpen ? 'Hide' : 'Preview' }}
+                      </button>
+                      <button class="action-btn-sm secondary" (click)="toggleSetSelect(si)">
+                        {{ s.selected ? 'Deselect' : 'Select' }}
+                      </button>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <p class="question-text">{{ s.title }}</p>
+                    @if (s.previewOpen) {
+                      @for (q of s.questions; track q.id; let qi = $index) {
+                        <div class="set-question-row" [class.unselected]="!q.selected">
+                          <label class="checkbox-wrapper small">
+                            <input
+                              type="checkbox"
+                              [checked]="q.selected"
+                              (change)="toggleSetQuestionSelect(si, qi)"
+                            />
+                            <span class="checkbox-custom"></span>
+                          </label>
+                          <div class="set-question-content">
+                            <p class="question-text">{{ qi + 1 }}. {{ q.text }}</p>
+                            @if (q.type === 'MCQ' && q.options.length > 0) {
+                              <div class="options-grid">
+                                @for (opt of q.options; track $index; let oi = $index) {
+                                  <div class="option-item">
+                                    <span class="option-letter">{{
+                                      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'][oi]
+                                    }}</span>
+                                    <span class="option-text">{{ opt }}</span>
+                                  </div>
+                                }
+                              </div>
+                            }
+                            @if (q.answer) {
+                              <div class="answer-section">
+                                <strong>Answer:</strong> {{ q.answer }}
+                              </div>
+                            }
+                            @if (q.topic) {
+                              <div class="topic-section">
+                                <span class="topic-label">Topic:</span> {{ q.topic }}
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      }
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
+          @if (generatedSets().length === 0) {
+            <div class="results-header">
+              <div class="results-info">
+                <h3>Generated Questions ({{ generatedQuestions().length }})</h3>
+                <span class="selected-info">{{ selectedCount() }} selected</span>
+              </div>
+              <div class="results-actions">
+                <button class="action-btn-sm secondary" (click)="toggleSelectAll()">
+                  {{
+                    selectedCount() === generatedQuestions().length ? 'Deselect All' : 'Select All'
+                  }}
+                </button>
+                <button class="action-btn-sm secondary" (click)="regenerate()">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                    <path d="M3 3v5h5" />
+                    <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                    <path d="M16 16h5v5" />
+                  </svg>
+                  Regenerate
+                </button>
+                <button
+                  class="action-btn-sm primary"
+                  (click)="saveSelected()"
+                  [disabled]="saving() || selectedCount() === 0"
+                >
+                  @if (saving()) {
+                    <span class="btn-spinner-sm"></span>
+                    Saving...
+                  } @else {
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                      <polyline points="17 21 17 13 7 13 7 21" />
+                      <polyline points="7 3 7 8 15 8" />
+                    </svg>
+                    Save Selected to Bank
+                  }
+                </button>
+              </div>
+            </div>
+
+            <div class="questions-list">
+              @for (q of generatedQuestions(); track $index; let i = $index) {
+                <div
+                  class="question-card"
+                  [class.selected]="q.selected"
+                  [class.editing]="editingIndex() === i"
+                >
+                  <div class="card-header">
+                    <label class="checkbox-wrapper">
+                      <input type="checkbox" [checked]="q.selected" (change)="toggleSelect(i)" />
+                      <span class="checkbox-custom"></span>
+                    </label>
+                    <div class="card-badges">
+                      <span class="type-badge" [attr.data-type]="q.type">{{ q.type }}</span>
+                      <span class="difficulty-badge" [attr.data-difficulty]="q.difficulty">{{
+                        q.difficulty
+                      }}</span>
+                      <span class="marks-badge"
+                        >{{ q.marks }} {{ q.marks === 1 ? 'mark' : 'marks' }}</span
+                      >
+                      @if (q.source) {
+                        <span class="source-badge">{{ q.source }}</span>
+                      }
+                    </div>
+                    <div class="card-actions">
+                      @if (editingIndex() !== i) {
+                        <button class="card-btn edit" (click)="startEdit(i)" title="Edit">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                            <path d="m15 5 4 4" />
+                          </svg>
+                        </button>
+                      }
+                      <button class="card-btn delete" (click)="removeQuestion(i)" title="Remove">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <line x1="18" y1="6" x2="6" y2="18" />
+                          <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  @if (editingIndex() === i) {
+                    <div class="edit-form">
+                      <div class="form-group">
+                        <label>Question Text</label>
+                        <textarea
+                          rows="3"
+                          [value]="editText()"
+                          (input)="editText.set($any($event.target).value)"
+                        ></textarea>
+                      </div>
+                      @if (q.type === 'MCQ') {
+                        <div class="form-group">
+                          <label>Options</label>
+                          @for (opt of editOptions(); track $index; let oi = $index) {
+                            <div class="edit-option-row">
+                              <span class="option-label">{{
+                                ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'][oi]
+                              }}</span>
+                              <input
+                                type="text"
+                                [value]="opt"
+                                (input)="updateEditOption(oi, $any($event.target).value)"
+                              />
+                              @if (editOptions().length > 2) {
+                                <button
+                                  class="option-remove"
+                                  (click)="removeEditOption(oi)"
+                                  type="button"
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="12"
+                                    height="12"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                  >
+                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                    <line x1="6" y1="6" x2="18" y2="18" />
+                                  </svg>
+                                </button>
+                              }
+                            </div>
+                          }
+                          @if (editOptions().length < 8) {
+                            <button
+                              class="add-option-btn-small"
+                              (click)="addEditOption()"
+                              type="button"
+                            >
+                              + Add Option
+                            </button>
+                          }
+                        </div>
+                      }
+                      <div class="form-row-2">
+                        <div class="form-group">
+                          <label>Answer</label>
+                          <input
+                            type="text"
+                            [value]="editAnswer()"
+                            (input)="editAnswer.set($any($event.target).value)"
+                          />
+                        </div>
+                        <div class="form-group">
+                          <label>Topic</label>
+                          <input
+                            type="text"
+                            [value]="editTopic()"
+                            (input)="editTopic.set($any($event.target).value)"
+                          />
+                        </div>
+                      </div>
+                      <div class="edit-actions">
+                        <button class="cancel-btn" (click)="cancelEdit()">Cancel</button>
+                        <button class="save-btn" (click)="saveEdit()">Save Changes</button>
+                      </div>
+                    </div>
+                  } @else {
+                    <div class="card-body">
+                      <p class="question-text">{{ q.text }}</p>
+                      @if (q.type === 'MCQ' && q.options.length > 0) {
+                        <div class="options-grid">
+                          @for (opt of q.options; track $index; let oi = $index) {
+                            <div class="option-item">
+                              <span class="option-letter">{{
+                                ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'][oi]
+                              }}</span>
+                              <span class="option-text">{{ opt }}</span>
+                            </div>
+                          }
+                        </div>
+                      }
+                      @if (q.answer) {
+                        <div class="answer-section"><strong>Answer:</strong> {{ q.answer }}</div>
+                      }
+                      @if (q.topic) {
+                        <div class="topic-section">
+                          <span class="topic-label">Topic:</span> {{ q.topic }}
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </main>
+</div>

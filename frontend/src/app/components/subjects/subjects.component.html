@@ -1,0 +1,455 @@
+<div class="subjects-page">
+  <header class="page-header">
+    <div class="header-left">
+      <div class="header-logo">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+          <path d="M8 7h6" />
+          <path d="M8 11h8" />
+        </svg>
+      </div>
+      <span class="header-title">Question Paper Generator</span>
+    </div>
+    <div class="header-right">
+      <a class="nav-link" routerLink="/dashboard">Dashboard</a>
+      <a class="nav-link active" routerLink="/subjects">Subjects</a>
+      <a class="nav-link" routerLink="/syllabus">Syllabus</a>
+      <a class="nav-link" routerLink="/questions">Questions</a>
+      <a class="nav-link" routerLink="/generate">AI Generate</a>
+      <a class="nav-link" routerLink="/patterns">Patterns</a>
+      <a class="nav-link" routerLink="/papers">Papers</a>
+      <a class="nav-link" routerLink="/papers/history">History</a>
+      <a class="nav-link" routerLink="/profile">Profile</a>
+      <a class="nav-link" routerLink="/settings">Settings</a>
+      <span class="user-name">{{ authService.user()?.name }}</span>
+      <button class="logout-btn" (click)="logout()">Sign Out</button>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="page-top">
+      <div class="page-title-section">
+        <h1>Subjects</h1>
+        <p>Manage your subjects and course materials.</p>
+      </div>
+      <button class="add-btn" (click)="openAddModal()">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M12 5v14" />
+          <path d="M5 12h14" />
+        </svg>
+        <span>Add Subject</span>
+      </button>
+    </div>
+
+    <div class="search-bar">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.3-4.3" />
+      </svg>
+      <input
+        type="text"
+        placeholder="Search by name, code, or description..."
+        [value]="searchQuery()"
+        (input)="onSearchInput($any($event.target).value)"
+      />
+      @if (searchQuery()) {
+        <button class="clear-search" (click)="clearSearch()">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      }
+    </div>
+
+    @if (loading()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading subjects...</p>
+      </div>
+    } @else if (error()) {
+      <div class="error-state">
+        <div class="error-icon">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="40"
+            height="40"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+        </div>
+        <p class="error-text">{{ error() }}</p>
+        <button class="retry-btn" (click)="loadSubjects()">Try Again</button>
+      </div>
+    } @else if (subjects().length === 0) {
+      <div class="empty-state">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="48"
+          height="48"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+          <path d="M8 7h6" />
+          <path d="M8 11h8" />
+        </svg>
+        @if (searchQuery()) {
+          <p>No subjects match your search</p>
+          <span>Try a different search term or clear the search.</span>
+        } @else {
+          <p>No subjects yet</p>
+          <span>Create your first subject to get started.</span>
+          <button class="empty-add-btn" (click)="openAddModal()">Add Subject</button>
+        }
+      </div>
+    } @else {
+      <div class="table-card">
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Subject Name</th>
+                <th>Code</th>
+                <th>Semester</th>
+                <th>Description</th>
+                <th>Created</th>
+                <th class="actions-col">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (subject of subjects(); track subject.id) {
+                <tr>
+                  <td class="cell-title">{{ subject.name }}</td>
+                  <td>
+                    <span class="code-badge">{{ subject.code }}</span>
+                  </td>
+                  <td>Sem {{ subject.semester }}</td>
+                  <td class="cell-desc">{{ subject.description || '-' }}</td>
+                  <td>{{ formatDate(subject.createdAt) }}</td>
+                  <td class="actions-cell">
+                    <button
+                      class="action-btn edit"
+                      (click)="openEditModal(subject)"
+                      title="Edit subject"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                        <path d="m15 5 4 4" />
+                      </svg>
+                    </button>
+                    <button
+                      class="action-btn delete"
+                      (click)="confirmDelete(subject)"
+                      title="Delete subject"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M3 6h18" />
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  </main>
+
+  @if (showModal()) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>{{ editingSubject() ? 'Edit Subject' : 'Add Subject' }}</h2>
+          <button class="modal-close" (click)="closeModal()">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+
+        @if (formError()) {
+          <div class="form-error-banner">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <span>{{ formError() }}</span>
+          </div>
+        }
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="subName">Subject Name</label>
+            <input
+              id="subName"
+              type="text"
+              placeholder="e.g. Mathematics"
+              [value]="formName()"
+              (input)="formName.set($any($event.target).value)"
+            />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="subCode">Subject Code</label>
+              <input
+                id="subCode"
+                type="text"
+                placeholder="e.g. MATH101"
+                [value]="formCode()"
+                (input)="formCode.set($any($event.target).value)"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="subSem">Semester</label>
+              <select
+                id="subSem"
+                [value]="formSemester()"
+                (change)="formSemester.set(+$any($event.target).value)"
+              >
+                <option value="1">Semester 1</option>
+                <option value="2">Semester 2</option>
+                <option value="3">Semester 3</option>
+                <option value="4">Semester 4</option>
+                <option value="5">Semester 5</option>
+                <option value="6">Semester 6</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="subDesc">Description</label>
+            <textarea
+              id="subDesc"
+              rows="3"
+              placeholder="Optional description..."
+              [value]="formDescription()"
+              (input)="formDescription.set($any($event.target).value)"
+            ></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="subBoard">Board</label>
+              <input
+                id="subBoard"
+                type="text"
+                placeholder="e.g. Maharashtra State Board"
+                [value]="formBoard()"
+                (input)="formBoard.set($any($event.target).value)"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="subClass">Class</label>
+              <input
+                id="subClass"
+                type="text"
+                placeholder="e.g. 10th / SSC"
+                [value]="formClassLevel()"
+                (input)="formClassLevel.set($any($event.target).value)"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="cancel-btn" (click)="closeModal()" [disabled]="formSubmitting()">
+            Cancel
+          </button>
+          <button class="submit-btn" (click)="submitForm()" [disabled]="formSubmitting()">
+            @if (formSubmitting()) {
+              <span class="btn-spinner"></span>
+              <span>{{ editingSubject() ? 'Updating...' : 'Creating...' }}</span>
+            } @else {
+              <span>{{ editingSubject() ? 'Update Subject' : 'Create Subject' }}</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (showDeleteConfirm()) {
+    <div class="modal-overlay" (click)="cancelDelete()">
+      <div class="modal delete-modal" (click)="$event.stopPropagation()">
+        <div class="delete-icon">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M3 6h18" />
+            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+          </svg>
+        </div>
+        <h3>Delete Subject</h3>
+        <p>
+          Are you sure you want to delete <strong>{{ deletingSubject()?.name }}</strong
+          >? This action cannot be undone.
+        </p>
+        <div class="delete-actions">
+          <button class="cancel-btn" (click)="cancelDelete()" [disabled]="deleting()">
+            Cancel
+          </button>
+          <button class="delete-btn" (click)="deleteSubject()" [disabled]="deleting()">
+            @if (deleting()) {
+              <span class="btn-spinner"></span>
+              <span>Deleting...</span>
+            } @else {
+              <span>Delete</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (toastMessage()) {
+    <div
+      class="toast"
+      [class.toast-error]="toastType() === 'error'"
+      [class.toast-success]="toastType() === 'success'"
+    >
+      @if (toastType() === 'success') {
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+      } @else {
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+      }
+      <span>{{ toastMessage() }}</span>
+    </div>
+  }
+</div>

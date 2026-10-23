@@ -1,0 +1,341 @@
+<div class="profile-page">
+  <header class="page-header">
+    <div class="header-left">
+      <div class="header-logo">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+          <path d="M8 7h6" />
+          <path d="M8 11h8" />
+        </svg>
+      </div>
+      <span class="header-title">Question Paper Generator</span>
+    </div>
+    <div class="header-right">
+      <a class="nav-link" routerLink="/dashboard">Dashboard</a>
+      <a class="nav-link" routerLink="/subjects">Subjects</a>
+      <a class="nav-link" routerLink="/syllabus">Syllabus</a>
+      <a class="nav-link" routerLink="/questions">Questions</a>
+      <a class="nav-link" routerLink="/generate">AI Generate</a>
+      <a class="nav-link" routerLink="/patterns">Patterns</a>
+      <a class="nav-link" routerLink="/papers">Papers</a>
+      <a class="nav-link" routerLink="/papers/history">History</a>
+      <span class="user-name">{{ authService.user()?.name }}</span>
+      <button class="logout-btn" (click)="logout()">Sign Out</button>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="page-top">
+      <div class="page-title-section">
+        <h1>Profile</h1>
+        <p>View and manage your profile information.</p>
+      </div>
+      <button class="settings-link-btn" (click)="navigateToSettings()">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+          />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+        <span>Settings</span>
+      </button>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading profile...</p>
+      </div>
+    } @else if (error()) {
+      <div class="error-state">
+        <div class="error-icon">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="40"
+            height="40"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+        </div>
+        <p class="error-text">{{ error() }}</p>
+        <button class="retry-btn" (click)="loadProfile()">Try Again</button>
+      </div>
+    } @else if (profileData()) {
+      <div class="profile-card">
+        <div class="profile-avatar">
+          <span class="avatar-text">{{ profileData()!.name.charAt(0).toUpperCase() }}</span>
+        </div>
+        <div class="profile-info">
+          <h2 class="profile-name">{{ profileData()!.name }}</h2>
+          <p class="profile-email">{{ profileData()!.email }}</p>
+          <div class="profile-meta">
+            @if (profileData()!.role) {
+              <span class="meta-badge role">{{ profileData()!.role }}</span>
+            }
+            @if (profileData()!.createdAt) {
+              <span class="meta-item"
+                >Member since {{ formatDate(profileData()!.createdAt!) }}</span
+              >
+            }
+          </div>
+        </div>
+      </div>
+
+      @if (successMessage()) {
+        <div class="success-banner">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+          </svg>
+          <span>{{ successMessage() }}</span>
+        </div>
+      }
+
+      <div class="profile-form-card">
+        <div class="form-card-header">
+          <h3>Personal Information</h3>
+          @if (!isEditing()) {
+            <button class="edit-btn" (click)="startEditing()">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                <path d="m15 5 4 4" />
+              </svg>
+              <span>Edit</span>
+            </button>
+          }
+        </div>
+
+        @if (isEditing()) {
+          @if (errorMessage()) {
+            <div class="error-banner">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="15" y1="9" x2="9" y2="15" />
+                <line x1="9" y1="9" x2="15" y2="15" />
+              </svg>
+              <span>{{ errorMessage() }}</span>
+            </div>
+          }
+
+          <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" novalidate>
+            <div class="form-group">
+              <label for="name">Full Name</label>
+              <div
+                class="input-wrapper"
+                [class.input-error]="f['name'].touched && f['name'].invalid"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+                <input
+                  id="name"
+                  type="text"
+                  formControlName="name"
+                  placeholder="Enter your full name"
+                  autocomplete="name"
+                />
+              </div>
+              @if (f['name'].touched && f['name'].errors) {
+                <div class="field-error">
+                  @if (f['name'].errors['required']) {
+                    <span>Name is required</span>
+                  } @else if (f['name'].errors['minlength']) {
+                    <span>Name must be at least 2 characters</span>
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email Address</label>
+              <div
+                class="input-wrapper"
+                [class.input-error]="f['email'].touched && f['email'].invalid"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect width="20" height="16" x="2" y="4" rx="2" />
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                </svg>
+                <input
+                  id="email"
+                  type="email"
+                  formControlName="email"
+                  placeholder="Enter your email"
+                  autocomplete="email"
+                />
+              </div>
+              @if (f['email'].touched && f['email'].errors) {
+                <div class="field-error">
+                  @if (f['email'].errors['required']) {
+                    <span>Email is required</span>
+                  } @else if (f['email'].errors['email']) {
+                    <span>Please enter a valid email address</span>
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="collegeName">College / Institute Name</label>
+              <div class="input-wrapper">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                  <path d="M6 12v5c3 3 10 3 12 0v-5" />
+                </svg>
+                <input
+                  id="collegeName"
+                  type="text"
+                  formControlName="collegeName"
+                  placeholder="Enter your college/institute name"
+                />
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="cancel-btn" (click)="cancelEditing()">Cancel</button>
+              <button type="submit" class="save-btn" [disabled]="isSubmitting()">
+                @if (isSubmitting()) {
+                  <span class="spinner-small"></span>
+                  <span>Saving...</span>
+                } @else {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                    <polyline points="17 21 17 13 7 13 7 21" />
+                    <polyline points="7 3 7 8 15 8" />
+                  </svg>
+                  <span>Save Changes</span>
+                }
+              </button>
+            </div>
+          </form>
+        } @else {
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Full Name</span>
+              <span class="info-value">{{ profileData()!.name }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Email Address</span>
+              <span class="info-value">{{ profileData()!.email }}</span>
+            </div>
+            @if (profileData()!.role) {
+              <div class="info-item">
+                <span class="info-label">Role</span>
+                <span class="info-value">{{ profileData()!.role }}</span>
+              </div>
+            }
+            <div class="info-item">
+              <span class="info-label">College Name</span>
+              <span class="info-value">{{ profileData()!.collegeName || 'Not specified' }}</span>
+            </div>
+            @if (profileData()!.createdAt) {
+              <div class="info-item">
+                <span class="info-label">Member Since</span>
+                <span class="info-value">{{ formatDate(profileData()!.createdAt!) }}</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </main>
+</div>
