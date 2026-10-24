@@ -264,7 +264,7 @@ export class HistoryComponent implements OnInit {
   <div style="text-align:center;font-size:0.9rem;color:#666;margin-bottom:0.5rem;">${this.authService.user()?.collegeName || '[College / Institute Name]'}</div>
   <h1>${p.title}</h1>
   <div class="meta">
-    <span><strong>Subject:</strong> ${p.subjectName} (${p.subjectCode})</span>
+    <span><strong>Subject:</strong> ${p.subjectName || '-'} (${p.subjectCode || '-'})</span>
     ${p.board ? `<span><strong>Board:</strong> ${p.board}</span>` : ''}
     ${p.classLevel ? `<span><strong>Class:</strong> ${p.classLevel}</span>` : ''}
     <span><strong>Duration:</strong> ${p.duration} min</span>
@@ -371,7 +371,7 @@ export class HistoryComponent implements OnInit {
   <div style="text-align:center;font-size:0.9rem;color:#666;margin-bottom:0.5rem;">${this.authService.user()?.collegeName || '[College / Institute Name]'}</div>
   <h1>${p.title}</h1>
   <div class="meta">
-    <span><strong>Subject:</strong> ${p.subjectName} (${p.subjectCode})</span>
+    <span><strong>Subject:</strong> ${p.subjectName || '-'} (${p.subjectCode || '-'})</span>
     ${p.board ? `<span><strong>Board:</strong> ${p.board}</span>` : ''}
     ${p.classLevel ? `<span><strong>Class:</strong> ${p.classLevel}</span>` : ''}
     <span><strong>Duration:</strong> ${p.duration} min</span>

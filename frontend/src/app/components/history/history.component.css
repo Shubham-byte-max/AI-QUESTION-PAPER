@@ -891,13 +891,26 @@
 }
 
 @media print {
-  body * {
-    visibility: hidden;
+  /* Hide all Paper History UI (header/nav, title, search, filters, table,
+     toast) so only the selected paper inside the preview modal prints.
+     These selectors are component-scoped, so they only match this page's
+     own elements. (A `body *` selector would not work here: encapsulation
+     rewrites it to `body[_ngcontent-…]`, which <body> never matches.) */
+  .page-header,
+  .page-content,
+  .toast {
+    display: none !important;
   }
 
-  .modal .preview-body,
-  .modal .preview-body * {
-    visibility: visible;
+  .modal-overlay {
+    position: static;
+    left: auto;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    background: transparent;
+    padding: 0;
+    display: block;
   }
 
   .modal {
@@ -912,13 +925,18 @@
     border-radius: 0;
   }
 
+  /* Hide modal controls (title, Print/Download/Close buttons). */
   .modal-header,
-  .modal-overlay {
-    background: transparent;
+  .preview-loading {
+    display: none !important;
   }
 
+  /* Let the paper content flow across pages instead of scrolling
+     inside a fixed-height (60vh) box. */
   .preview-body {
     padding: 0;
+    max-height: none;
+    overflow: visible;
   }
 
   /* @page margin 0 suppresses the browser's own print header/footer

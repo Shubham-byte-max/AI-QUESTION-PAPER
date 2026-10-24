@@ -270,7 +270,7 @@ export class QuestionsComponent implements OnInit {
     this.formMarks.set(question.marks);
     this.formTopic.set(question.topic);
     this.formSource.set(question.source);
-    this.formSubjectId.set(question.subjectId);
+    this.formSubjectId.set(question.subjectId ?? '');
     this.formError.set('');
     this.showModal.set(true);
   }

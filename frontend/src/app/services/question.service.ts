@@ -14,9 +14,9 @@ export interface Question {
   marks: number;
   topic: string;
   source: string;
-  subjectId: string;
-  subjectName: string;
-  subjectCode: string;
+  subjectId: string | null;
+  subjectName: string | null;
+  subjectCode: string | null;
   paperId?: string | null;
   createdAt: string;
 }

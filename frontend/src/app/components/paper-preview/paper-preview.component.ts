@@ -562,7 +562,7 @@ export class PaperPreviewComponent implements OnInit, OnDestroy {
   <div style="text-align:center;font-size:0.9rem;color:#666;margin-bottom:0.5rem;">${this.authService.user()?.collegeName || '[College / Institute Name]'}</div>
   <h1>${p.title}</h1>
   <div class="meta">
-    <span><strong>Subject:</strong> ${p.subjectName} (${p.subjectCode})</span>
+    <span><strong>Subject:</strong> ${p.subjectName || '-'} (${p.subjectCode || '-'})</span>
     ${this.getSubjectBoard() ? `<span><strong>Board:</strong> ${this.getSubjectBoard()}</span>` : ''}
     ${this.getSubjectClassLevel() ? `<span><strong>Class:</strong> ${this.getSubjectClassLevel()}</span>` : ''}
     ${semester ? `<span><strong>Semester:</strong> ${semester}</span>` : ''}

@@ -746,7 +746,9 @@
               >{{ viewingQuestion()!.marks }}
               {{ viewingQuestion()!.marks === 1 ? 'mark' : 'marks' }}</span
             >
-            <span class="code-badge">{{ viewingQuestion()!.subjectCode }}</span>
+            @if (viewingQuestion()!.subjectCode) {
+              <span class="code-badge">{{ viewingQuestion()!.subjectCode }}</span>
+            }
           </div>
           <p class="view-text">{{ viewingQuestion()!.text }}</p>
           @if (viewingQuestion()!.type === 'MCQ' && viewingQuestion()!.options.length > 0) {
@@ -770,7 +772,7 @@
           <div class="view-meta">
             <div><span>Topic:</span> {{ viewingQuestion()!.topic || '-' }}</div>
             <div><span>Source:</span> {{ viewingQuestion()!.source || '-' }}</div>
-            <div><span>Subject:</span> {{ viewingQuestion()!.subjectName }}</div>
+            <div><span>Subject:</span> {{ viewingQuestion()!.subjectName || 'Unknown subject' }}</div>
             <div><span>Created:</span> {{ formatDate(viewingQuestion()!.createdAt) }}</div>
           </div>
         </div>

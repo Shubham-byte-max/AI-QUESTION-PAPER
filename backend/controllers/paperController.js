@@ -216,12 +216,14 @@ exports.getPaper = async (req, res) => {
       paper: {
         id: paper._id,
         title: paper.title,
-        subjectId: paper.subjectId._id,
-        subjectName: paper.subjectId.name,
-        subjectCode: paper.subjectId.code,
-        semester: paper.subjectId.semester || null,
-        board: paper.subjectId.board || '',
-        classLevel: paper.subjectId.classLevel || '',
+        // `subjectId` populates to null when the referenced Subject has been
+        // deleted (dangling reference). Never dereference it without a check.
+        subjectId: paper.subjectId?._id ?? null,
+        subjectName: paper.subjectId?.name ?? null,
+        subjectCode: paper.subjectId?.code ?? null,
+        semester: paper.subjectId?.semester ?? null,
+        board: paper.subjectId?.board ?? '',
+        classLevel: paper.subjectId?.classLevel ?? '',
         questions: (paper.questions || [])
           .filter((q) => q)
           .map((q) => ({
