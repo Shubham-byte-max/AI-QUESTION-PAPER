@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -57,7 +58,7 @@ export class LoginComponent {
 
         if (err.status === 0) {
           this.errorMessage.set(
-            'Unable to connect to the backend server. Please check that the backend is running at http://localhost:5000.',
+            `Unable to connect to the backend server. Please check that the backend is running at ${environment.apiUrl}.`,
           );
           return;
         }
@@ -65,7 +66,7 @@ export class LoginComponent {
         // Convert raw browser network error into a friendly message
         if (msg === 'Failed to fetch' || err.message === 'Failed to fetch') {
           this.errorMessage.set(
-            'Unable to connect to the backend server. Please check that the backend is running at http://localhost:5000.',
+            `Unable to connect to the backend server. Please check that the backend is running at ${environment.apiUrl}.`,
           );
         } else {
           this.errorMessage.set(msg);

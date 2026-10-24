@@ -14,7 +14,11 @@ const app = express();
 
 app.use(
   cors({
-    origin: ['http://localhost:4200', 'http://localhost:4201'],
+    origin: [
+      'http://localhost:4200',
+      'http://localhost:4201',
+      'https://shubham-byte-max.github.io',
+    ],
     credentials: true,
   }),
 );
