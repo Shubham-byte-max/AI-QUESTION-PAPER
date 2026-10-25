@@ -287,16 +287,20 @@
 }
 
 .table-wrapper {
+  width: 100%;
   overflow-x: auto;
 }
 
+/* table-layout: fixed + explicit column widths keep the table at the card
+   width, so long titles/questions are shortened instead of stretching it */
 .data-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
 }
 
 .data-table th {
-  padding: 0.75rem 1.25rem;
+  padding: 0.75rem 0.625rem;
   text-align: left;
   font-size: 0.75rem;
   font-weight: 600;
@@ -305,26 +309,81 @@
   letter-spacing: 0.03em;
   background: #f8fafc;
   border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .data-table td {
-  padding: 0.75rem 1.25rem;
+  padding: 0.75rem 0.625rem;
   font-size: 0.8125rem;
   color: #475569;
   border-bottom: 1px solid #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* first/last cell keeps the card's 1.25rem edge alignment */
+.data-table th:first-child,
+.data-table td:first-child {
+  padding-left: 1.25rem;
+}
+
+.data-table th:last-child,
+.data-table td:last-child {
+  padding-right: 1.25rem;
 }
 
 .data-table tbody tr:last-child td {
   border-bottom: none;
 }
 
+/* Recent Papers: Title | Subject | Marks | Duration | Date */
+.papers-table th:nth-child(1) {
+  width: auto;
+}
+
+.papers-table th:nth-child(2) {
+  width: 126px;
+}
+
+.papers-table th:nth-child(3) {
+  width: 64px;
+}
+
+.papers-table th:nth-child(4) {
+  width: 86px;
+}
+
+.papers-table th:nth-child(5) {
+  width: 104px;
+}
+
+/* Recent Questions: Question | Type | Difficulty | Marks | Date */
+.questions-table th:nth-child(1) {
+  width: auto;
+}
+
+.questions-table th:nth-child(2) {
+  width: 88px;
+}
+
+.questions-table th:nth-child(3) {
+  width: 90px;
+}
+
+.questions-table th:nth-child(4) {
+  width: 64px;
+}
+
+.questions-table th:nth-child(5) {
+  width: 104px;
+}
+
 .cell-title {
   font-weight: 500;
   color: #1e293b;
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .badge {
@@ -472,6 +531,15 @@
   text-align: right;
 }
 
+/* The tables need ~500px to show every column, so the two table cards stack
+   before the container shrinks below that (dashboard-content max is 1100px,
+   which makes each card 508px wide while they sit side by side). */
+@media (max-width: 1100px) {
+  .tables-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 900px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -479,6 +547,77 @@
 
   .content-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Phone widths: tighten the cells, let the short columns wrap instead of
+   clipping, narrow the fixed columns and drop the Duration column so every
+   table still fits its card without scrolling. */
+@media (max-width: 480px) {
+  .data-table th,
+  .data-table td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .data-table th:first-child,
+  .data-table td:first-child {
+    padding-left: 1rem;
+  }
+
+  .data-table th:last-child,
+  .data-table td:last-child {
+    padding-right: 1rem;
+  }
+
+  .data-table td {
+    white-space: normal;
+  }
+
+  .data-table td.cell-title {
+    white-space: nowrap;
+  }
+
+  .papers-table th:nth-child(2) {
+    width: 92px;
+  }
+
+  .papers-table th:nth-child(3) {
+    width: 60px;
+  }
+
+  .papers-table th:nth-child(4),
+  .papers-table td:nth-child(4) {
+    display: none;
+  }
+
+  .papers-table th:nth-child(5) {
+    width: 72px;
+  }
+
+  .questions-table th:nth-child(2) {
+    width: 80px;
+  }
+
+  .questions-table th:nth-child(3) {
+    width: 84px;
+  }
+
+  .questions-table th:nth-child(4) {
+    width: 60px;
+  }
+
+  .questions-table th:nth-child(5) {
+    width: 72px;
+  }
+
+  /* keep the text columns readable: below this the card is simply too narrow,
+     so the wrapper scrolls instead of collapsing the column */
+  .papers-table {
+    min-width: 320px;
+  }
+
+  .questions-table {
+    min-width: 340px;
   }
 }
 
